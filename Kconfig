@@ -173,6 +173,39 @@ config PMW3610_BALL_ACTION_TICK
     help
         Ball action tick value. Higher values require more movement to trigger a ball action.
 
+config PMW3610_APPLY_MOUSE_ACCELERATION
+    bool "Apply mouse acceleration"
+    default y
+    help
+      Enable this option to apply mouse acceleration.
+      This scales pointer speed based on the movement magnitude.
+
+config PMW3610_MIN_ACCELERATION_FACTOR
+    int "Minimum acceleration factor (x10)"
+    default 5
+    help
+      Minimum acceleration factor applied at low speeds.
+      Multiply by 10 to get actual float (e.g., 5 = 0.5).
+
+config PMW3610_MAX_ACCELERATION_FACTOR
+    int "Maximum acceleration factor (x10)"
+    default 60
+    help
+      Maximum acceleration factor applied at high speeds.
+      Multiply by 10 to get actual float (e.g., 60 = 6.0).
+
+config PMW3610_MIN_MOTION_THRESHOLD
+    int "Minimum motion threshold"
+    default 5
+    help
+      Below this magnitude, the minimum acceleration factor is used.
+
+config PMW3610_MAX_MOTION_THRESHOLD
+    int "Maximum motion threshold"
+    default 30
+    help
+      Above this magnitude, the maximum acceleration factor is used.
+
 module = PMW3610
 module-str = PMW3610
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"

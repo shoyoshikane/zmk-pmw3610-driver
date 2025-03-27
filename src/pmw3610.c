@@ -662,6 +662,27 @@ static int pmw3610_report_data(const struct device *dev) {
     int16_t raw_y =
         TOINT16((buf[PMW3610_Y_L_POS] + ((buf[PMW3610_XY_H_POS] & 0x0F) << 8)), 12) / dividor;
 
+#ifdef CONFIG_PMW3610_APPLY_MOUSE_ACCELERATION
+    int16_t motion_magnitude = abs(raw_x) + abs(raw_y);
+
+    const float min_acceleration_factor = CONFIG_PMW3610_MIN_ACCELERATION_FACTOR / 10.0f;
+    const float max_acceleration_factor = CONFIG_PMW3610_MAX_ACCELERATION_FACTOR / 10.0f;
+
+    const float acceleration_scale = (max_acceleration_factor - min_acceleration_factor) /
+                                     (CONFIG_PMW3610_MAX_MOTION_THRESHOLD - CONFIG_PMW3610_MIN_MOTION_THRESHOLD);
+    float acceleration_factor = min_acceleration_factor +
+                                (motion_magnitude - CONFIG_PMW3610_MIN_MOTION_THRESHOLD) * acceleration_scale;
+
+    if (motion_magnitude <= CONFIG_PMW3610_MIN_MOTION_THRESHOLD) {
+        acceleration_factor = min_acceleration_factor;
+    } else if (motion_magnitude >= CONFIG_PMW3610_MAX_MOTION_THRESHOLD) {
+        acceleration_factor = max_acceleration_factor;
+    }
+
+    raw_x = (int16_t)roundf((float)raw_x * acceleration_factor);
+    raw_y = (int16_t)roundf((float)raw_y * acceleration_factor);
+#endif
+
     if (IS_ENABLED(CONFIG_PMW3610_ORIENTATION_0)) {
         x = -raw_x;
         y = raw_y;
